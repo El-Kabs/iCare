@@ -18,14 +18,7 @@ import {
 } from 'react-navigation';
 import * as firebase from 'firebase';
 
-var config = {
-  apiKey: 'AIzaSyBaDFN9ive_WcDv22fZi8ZS_XFxhVTigyI',
-  authDomain: 'icare-a350b.firebaseapp.com',
-  databaseURL: 'https://icare-a350b.firebaseio.com',
-  projectId: 'icare-a350b',
-  storageBucket: 'icare-a350b.appspot.com',
-  messagingSenderId: '696032112369',
-};
+/**CONFIG**/
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config);
