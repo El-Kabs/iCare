@@ -9,6 +9,7 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
+  Button
 } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import {
@@ -18,7 +19,14 @@ import {
 } from 'react-navigation';
 import * as firebase from 'firebase';
 
-/**CONFIG**/
+var config = {
+  apiKey: "AIzaSyBaDFN9ive_WcDv22fZi8ZS_XFxhVTigyI",
+  authDomain: "icare-a350b.firebaseapp.com",
+  databaseURL: "https://icare-a350b.firebaseio.com",
+  projectId: "icare-a350b",
+  storageBucket: "icare-a350b.appspot.com",
+  messagingSenderId: "696032112369"
+};
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config);
@@ -90,7 +98,21 @@ class HomeScreen extends Component {
     );
   }
 }
-
+class LoginScreen extends Component {
+  render(){
+    const { navigation } = this.props;
+    
+    return(
+      <View>
+        <Button title="Hola xd" onPress="irAgregarUsuario">
+          
+        </Button>
+        <Button title="Bye xd">
+        </Button>
+        </View>
+    );
+}
+}
 class UsuarioScreen extends Component {
   render() {
     const { navigation } = this.props;
@@ -115,9 +137,10 @@ const Pantallas = createStackNavigator(
   {
     Home: HomeScreen,
     Usuario: UsuarioScreen,
+    Login: LoginScreen
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Login',
   }
 );
 const styles = StyleSheet.create({
