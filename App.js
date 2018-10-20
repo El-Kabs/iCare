@@ -17,6 +17,7 @@ import {
   TabNavigator,
   TabBarBottom,
 } from 'react-navigation';
+import t from 'tcomb-form-native';
 import * as firebase from 'firebase';
 
 var config = {
@@ -63,7 +64,7 @@ class HomeScreen extends Component {
       .database()
       .ref('/json')
       .once('value')
-      .then(function(snapshot) {
+      .then(function (snapshot) {
         var snap = snapshot.val();
         if (lectura.id === snap.id) {
           console.log(snap);
@@ -80,16 +81,16 @@ class HomeScreen extends Component {
         {this.state.hasCameraPermission === null
           ? <Text>Requesting for camera permission</Text>
           : this.state.hasCameraPermission === false
-              ? <Text style={{ color: '#fff' }}>
-                  Camera permission is not granted
+            ? <Text style={{ color: '#fff' }}>
+              Camera permission is not granted
                 </Text>
-              : <BarCodeScanner
-                  onBarCodeRead={this._handleBarCodeRead}
-                  style={{
-                    height: Dimensions.get('window').height,
-                    width: Dimensions.get('window').width,
-                  }}
-                />}
+            : <BarCodeScanner
+              onBarCodeRead={this._handleBarCodeRead}
+              style={{
+                height: Dimensions.get('window').height,
+                width: Dimensions.get('window').width,
+              }}
+            />}
 
         {}
 
@@ -99,23 +100,87 @@ class HomeScreen extends Component {
   }
 }
 class LoginScreen extends Component {
-  render(){
+  render() {
     const { navigation } = this.props;
-    
-    return(
+    const { navigate } = this.props.navigation;
+    return (
       <View>
-        <Button title="Hola xd" onPress="irAgregarUsuario">
-          
+        <Button title="Agregar Usuario" onPress={() => navigate('AgregarUsuario')}>
+
         </Button>
-        <Button title="Bye xd">
+        <Button title="Cámara" onPress={() => navigate('Home')}>
         </Button>
-        </View>
+      </View>
     );
+  }
 }
+
+class AgregarUsuarioScreen extends Component {
+  render() {
+    const { navigation } = this.props;
+    const Form = t.form.Form;
+
+    const User = t.struct({
+      Nombre: t.String,
+      Edad: t.String,
+      Tratamiento: t.String,
+      Medicamentos: t.String,
+      Examenes: t.Boolean
+    });
+
+    _handleSubmit = result =>{
+
+    }
+    return (
+      <View style={styles.container}>
+        <Form type={User} /> {/* Notice the addition of the Form component */}
+        <Button
+          title="Agregar Paciente"
+          onPress={() => this._handleSubmit}
+        />
+      </View>
+    );
+    
+  }
+}
+class EditarUsuarioScreen extends Component {
+  render() {
+    const { navigation } = this.props;
+    const Form = t.form.Form;
+    const datos = navigation.getParam('datoss');
+    console.log(datos.nombre)
+    var Vinicial = {
+      Nombre: datos.nombre,
+      Edad: 41,
+      
+    };
+    const User = t.struct({
+      Nombre: t.String,
+      Edad: t.Number,
+      Tratamiento: t.String,
+      Medicamentos: t.String,
+      Examenes: t.Boolean
+    });
+
+    _handleSubmit = result =>{
+
+    }
+    return (
+      <View style={styles.container}>
+        <Form type={User} value={Vinicial} /> {/* Notice the addition of the Form component */}
+        <Button
+          title="Editar Paciente"
+          onPress={() => this._handleSubmit}
+        />
+      </View>
+    );
+    
+  }
 }
 class UsuarioScreen extends Component {
   render() {
     const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
 
     return (
@@ -128,6 +193,7 @@ class UsuarioScreen extends Component {
         <Text>Details Screen</Text>
         <Text>Id: {JSON.stringify(datos.id)}</Text>
         <Text>Nombre: {JSON.stringify(datos.nombre)}</Text>
+        <Button title="Editar Paciente" onPress={() => navigate('EditarUsuario' , {datoss : datos})}></Button>
       </View>
     );
   }
@@ -137,7 +203,9 @@ const Pantallas = createStackNavigator(
   {
     Home: HomeScreen,
     Usuario: UsuarioScreen,
-    Login: LoginScreen
+    Login: LoginScreen,
+    AgregarUsuario: AgregarUsuarioScreen,
+    EditarUsuario: EditarUsuarioScreen
   },
   {
     initialRouteName: 'Login',
@@ -148,7 +216,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#ffffff',
   },
   bottomBar: {
     position: 'absolute',
