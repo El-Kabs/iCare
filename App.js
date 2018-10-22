@@ -12,7 +12,8 @@ import {
   ToolbarAndroid,
   TouchableOpacity,
   Button,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import {
@@ -161,11 +162,13 @@ class AgregarUsuarioScreen extends Component {
           backgroundColor: '#00701a',
           elevation: 4
         }} />
-        <Form type={User} />
-        <Button
-          title="Agregar Paciente"
-          onPress={() => this._handleSubmit}
-        />
+        <ScrollView>
+          <Form type={User} />
+          <Button
+            title="Agregar Paciente"
+            onPress={() => this._handleSubmit}
+          />
+        </ScrollView>
       </View>
     );
 
