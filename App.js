@@ -4,16 +4,19 @@ import {
   Linking,
   Dimensions,
   LayoutAnimation,
+  FlatList,
   Text,
   View,
   StatusBar,
   StyleSheet,
+  ToolbarAndroid,
   TouchableOpacity,
-  Button
+  Button,
+  TextInput
 } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import {
-  createStackNavigator,
+  StackNavigator,
   TabNavigator,
   TabBarBottom,
 } from 'react-navigation';
@@ -37,9 +40,7 @@ var database = firebase.database();
 
 class HomeScreen extends Component {
 
-  static navigationOptions = {
-    header: null,
-  };
+  
 
   state = {
     hasCameraPermission: null,
@@ -66,15 +67,24 @@ class HomeScreen extends Component {
       .once('value')
       .then(function (snapshot) {
         var snap = snapshot.val();
-        if (lectura.id === snap.id) {
-          console.log(snap);
-          navigate('Usuario', { datos: snap });
+        var found = {}
+        var encontrado = false;
+        for (var i = 0; i < snap.length; i++) {
+          if (snap[i].id === lectura.id) {
+            found = snap[i];
+            encontrado = true;
+          }
+        }
+        if (encontrado) {
+          navigate('Usuario', { datos: found });
         }
       });
   };
 
   render() {
     const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
     return (
       <View style={styles.container}>
 
@@ -100,11 +110,18 @@ class HomeScreen extends Component {
   }
 }
 class LoginScreen extends Component {
+
   render() {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
     return (
       <View>
+        <ToolbarAndroid style={{
+          height: StatusBar.currentHeight,
+          backgroundColor: '#00701a',
+          elevation: 4
+        }} />
         <Button title="Agregar Usuario" onPress={() => navigate('AgregarUsuario')}>
 
         </Button>
@@ -116,68 +133,187 @@ class LoginScreen extends Component {
 }
 
 class AgregarUsuarioScreen extends Component {
+
   render() {
     const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
     const Form = t.form.Form;
 
     const User = t.struct({
       Nombre: t.String,
-      Edad: t.String,
-      Tratamiento: t.String,
+      Edad: t.Number,
+      EPS: t.String,
+      Cedula: t.String,
+      Especialidad: t.String,
       Medicamentos: t.String,
-      Examenes: t.Boolean
+      Examenes: t.String,
+      Ordenes: t.String
     });
 
-    _handleSubmit = result =>{
+    _handleSubmit = result => {
 
     }
     return (
       <View style={styles.container}>
-        <Form type={User} /> {/* Notice the addition of the Form component */}
+        <ToolbarAndroid style={{
+          height: StatusBar.currentHeight,
+          backgroundColor: '#00701a',
+          elevation: 4
+        }} />
+        <Form type={User} />
         <Button
           title="Agregar Paciente"
           onPress={() => this._handleSubmit}
         />
       </View>
     );
-    
+
   }
 }
 class EditarUsuarioScreen extends Component {
+
   render() {
     const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
     const Form = t.form.Form;
-    const datos = navigation.getParam('datoss');
-    console.log(datos.nombre)
     var Vinicial = {
-      Nombre: datos.nombre,
-      Edad: 41,
-      
+      Nombre: datos.Nombre,
+      Edad: datos.edad,
+      Cedula: datos.cedula,
+      EPS: datos.eps,
     };
     const User = t.struct({
       Nombre: t.String,
       Edad: t.Number,
-      Tratamiento: t.String,
+      EPS: t.String,
+      Cedula: t.String,
+      Especialidad: t.String,
       Medicamentos: t.String,
-      Examenes: t.Boolean
+      Examenes: t.String,
+      Ordenes: t.String
     });
 
-    _handleSubmit = result =>{
+    _handleSubmit = result => {
 
     }
+
     return (
       <View style={styles.container}>
-        <Form type={User} value={Vinicial} /> {/* Notice the addition of the Form component */}
+        <ToolbarAndroid style={{
+          height: StatusBar.currentHeight,
+          backgroundColor: '#00701a',
+          elevation: 4
+        }} />
+        <Text>Nombre: {JSON.stringify(datos.Nombre)}</Text>
+        <Text>Edad: {JSON.stringify(datos.edad)}</Text>
+        <Text>EPS: {JSON.stringify(datos.eps)}</Text>
+        <Text>Cedula: {JSON.stringify(datos.cedula)}</Text>
+        <TouchableOpacity onPress={() => navigate('Formato', { datos: datos })}>
+          <Text> {JSON.stringify(datos.especialidad)} </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigate('Medicamentos', { datos: datos })}>
+          <Text> Medicamentos </Text>
+        </TouchableOpacity>
+
         <Button
-          title="Editar Paciente"
+          title="Guardar"
           onPress={() => this._handleSubmit}
         />
       </View>
     );
-    
+
   }
 }
+
+class NotasScreen extends Component {
+  static navigationOptions = {
+    title: "Notas"
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = { text: 'Useless Placeholder' };
+  }
+
+  render() {
+    const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
+
+
+    return (
+      <View>
+        <TextInput style={{ borderColor: 'gray', borderWidth: 1 }} editable={true} onChangeText={(text) => this.setState({ text })}
+          value={datos.notas} />
+      </View>
+    )
+  }
+}
+
+class ExamenesScreen extends Component {
+
+  static navigationOptions = {
+    title: "Examenes"
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = { text: 'Useless Placeholder' };
+  }
+
+  render() {
+    const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
+
+
+    return (
+      <View>
+
+      </View>
+    )
+  }
+
+}
+
+class MedicamentosScreen extends Component {
+
+  static navigationOptions = {
+    title: "Medicamentos"
+  }
+
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
+
+
+    return (
+      <View>
+        <FlatList
+          data={datos.medicamentos}
+          renderItem={({item}) => <Text>{item.nombre}, {item.dosis},  {item.informacion}</Text>}
+          keyExtractor={({id}, index) => id}
+        />
+      </View>
+    )
+  }
+
+}
+
 class UsuarioScreen extends Component {
+
+  static navigationOptions = {
+    title: "Usuario"
+  }
+
   render() {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
@@ -190,22 +326,63 @@ class UsuarioScreen extends Component {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Text>Details Screen</Text>
-        <Text>Id: {JSON.stringify(datos.id)}</Text>
-        <Text>Nombre: {JSON.stringify(datos.nombre)}</Text>
-        <Button title="Editar Paciente" onPress={() => navigate('EditarUsuario' , {datoss : datos})}></Button>
+        <ToolbarAndroid style={{
+          height: StatusBar.currentHeight,
+          backgroundColor: '#00701a',
+          elevation: 4
+        }} />
+        <Text>Paciente</Text>
+        <Text>Nombre: {JSON.stringify(datos.Nombre)}</Text>
+        <Text>Edad: {JSON.stringify(datos.edad)}</Text>
+        <Text>EPS: {JSON.stringify(datos.eps)}</Text>
+        <Text>Cedula: {JSON.stringify(datos.cedula)}</Text>
+        <Button title="Editar Paciente" onPress={() => navigate('EditarUsuario', { datos: datos })}></Button>
       </View>
     );
   }
 }
 
-const Pantallas = createStackNavigator(
+const Pantallas = StackNavigator(
   {
-    Home: HomeScreen,
-    Usuario: UsuarioScreen,
-    Login: LoginScreen,
-    AgregarUsuario: AgregarUsuarioScreen,
-    EditarUsuario: EditarUsuarioScreen
+    Home: {
+      screen: HomeScreen
+    },
+    Usuario: {
+      screen: UsuarioScreen
+    },
+    Login: {
+      screen: LoginScreen
+    },
+    AgregarUsuario: {
+      screen: AgregarUsuarioScreen
+    },
+    EditarUsuario: {
+      screen: EditarUsuarioScreen
+    },
+    Medicamentos: {
+      screen: MedicamentosScreen
+    },
+    Formato: {
+      screen: TabNavigator({
+        Notas: {
+          screen: NotasScreen,
+          activeTintColor: '#e91e63'
+        },
+        Examenes: {
+          screen: ExamenesScreen,
+          activeTintColor: '#e91e63'
+        }
+      }, {
+          tabBarPosition: 'bottom',
+          tabBarOptions: {
+            activeTintColor: '#10f43b',
+            backgroundColor: '#058222',
+            style: {
+              backgroundColor: '#058222'
+            }
+          }
+        })
+    }
   },
   {
     initialRouteName: 'Login',
