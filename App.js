@@ -153,13 +153,13 @@ class AgregarUsuarioScreen extends Component {
       Edad: t.Number,
       EPS: t.String,
       Cedula: t.String,
-      Especialidad: t.String,
-      Medicamentos: t.String,
-      Examenes: t.String,
-      Ordenes: t.String
     });
 
     _handleSubmit = result => {
+      console.log("Hola")
+      firebase.database().ref("/json").push().set({3:{
+        nombre: "Valeria"
+      }});
 
     }
     return (
