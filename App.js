@@ -84,28 +84,31 @@ class HomeScreen extends Component {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
-    return (
-      <View style={styles.container}>
-
-        {this.state.hasCameraPermission === null
-          ? <Text>Requesting for camera permission</Text>
-          : this.state.hasCameraPermission === false
-            ? <Text style={{ color: '#fff' }}>
-              Camera permission is not granted
-                </Text>
-            : <BarCodeScanner
-              onBarCodeRead={this._handleBarCodeRead}
-              style={{
-                height: Dimensions.get('window').height,
-                width: Dimensions.get('window').width,
-              }}
-            />}
-
-        {}
-
-        <StatusBar hidden />
-      </View>
-    );
+    if (this.props.navigation.state.routeName !== 'Home') return null
+    else{
+      return (
+        <View style={styles.container}>
+  
+          {this.state.hasCameraPermission === null
+            ? <Text>Requesting for camera permission</Text>
+            : this.state.hasCameraPermission === false
+              ? <Text style={{ color: '#fff' }}>
+                Camera permission is not granted
+                  </Text>
+              : <BarCodeScanner
+                onBarCodeRead={this._handleBarCodeRead}
+                style={{
+                  height: Dimensions.get('window').height,
+                  width: Dimensions.get('window').width,
+                }}
+              />}
+  
+          {}
+  
+          <StatusBar hidden />
+        </View>
+      );
+    }
   }
 }
 class LoginScreen extends Component {
@@ -295,21 +298,24 @@ class CamaraScreen extends Component {
   state = {
     hasCameraPermission: null,
     type: Camera.Constants.Type.back,
+    permissionsGranted: false,
   };
 
   async componentWillMount() {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({ hasCameraPermission: status === 'granted' });
+    this.setState({ permissionsGranted: status === 'granted' });
   }
 
   render() {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
-    const { hasCameraPermission } = this.state;
-    if (hasCameraPermission === null) {
+    const { permissionsGranted } = this.state;
+    console.log(this.state)
+    console.log(this.props)
+    if (permissionsGranted === null) {
       return <View />;
-    } else if (hasCameraPermission === false) {
+    } else if (permissionsGranted === false) {
       return <Text>No access to camera</Text>;
     } else {
       return (
