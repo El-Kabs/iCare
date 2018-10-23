@@ -15,7 +15,7 @@ import {
   TextInput,
   ScrollView
 } from 'react-native';
-import { BarCodeScanner, Permissions } from 'expo';
+import { BarCodeScanner, Camera, Permissions } from 'expo';
 import {
   StackNavigator,
   TabNavigator,
@@ -40,8 +40,6 @@ if (!firebase.apps.length) {
 var database = firebase.database();
 
 class HomeScreen extends Component {
-
-  
 
   state = {
     hasCameraPermission: null,
@@ -177,6 +175,7 @@ class AgregarUsuarioScreen extends Component {
 class EditarUsuarioScreen extends Component {
 
   render() {
+    
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
@@ -201,7 +200,7 @@ class EditarUsuarioScreen extends Component {
     _handleSubmit = result => {
 
     }
-
+    console.log(datos);
     return (
       <View style={styles.container}>
         <ToolbarAndroid style={{
@@ -213,10 +212,12 @@ class EditarUsuarioScreen extends Component {
         <Text>Edad: {JSON.stringify(datos.edad)}</Text>
         <Text>EPS: {JSON.stringify(datos.eps)}</Text>
         <Text>Cedula: {JSON.stringify(datos.cedula)}</Text>
-        <TouchableOpacity onPress={() => navigate('Formato', { datos: datos })}>
-          <Text> {JSON.stringify(datos.especialidad)} </Text>
-        </TouchableOpacity>
-
+        
+        <FlatList
+          data={datos.especialidades}
+          renderItem={({item}) => <TouchableOpacity onPress={() => navigate('Formato', { datos: datos })}><Text>{item.nombre}</Text></TouchableOpacity>}
+          keyExtractor={({id}, index) => id}
+        />
         <TouchableOpacity onPress={() => navigate('Medicamentos', { datos: datos })}>
           <Text> Medicamentos </Text>
         </TouchableOpacity>
@@ -275,14 +276,83 @@ class ExamenesScreen extends Component {
 
     return (
       <View>
-
+        <Button title="Camara" onPress={() => navigate('Camara', { datos: datos })}/>
       </View>
     )
   }
 
 }
 
+class CamaraScreen extends Component {
+  static navigationOptions = {
+    title: "Camara"
+  }
+
+  constructor(props) {
+    super(props);
+  }
+
+  state = {
+    hasCameraPermission: null,
+    type: Camera.Constants.Type.back,
+  };
+
+  async componentWillMount() {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ hasCameraPermission: status === 'granted' });
+  }
+
+  render() {
+    const { navigation } = this.props;
+    const { navigate } = this.props.navigation;
+    const datos = navigation.getParam('datos', '{"id": 0}');
+    const { hasCameraPermission } = this.state;
+    if (hasCameraPermission === null) {
+      return <View />;
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
+      return (
+        <View style={{ flex: 1 }}>
+          <Camera style={{ flex: 1 }} type={this.state.type}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+              }}>
+              <TouchableOpacity
+                style={{
+                  flex: 0.1,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  this.setState({
+                    type: this.state.type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back,
+                  });
+                }}>
+                <Text
+                  style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+                  {' '}Flip{' '}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Camera>
+        </View>
+      );
+    }
+  }
+}
+
 class MedicamentosScreen extends Component {
+
+  state = {
+    hasCameraPermission: null,
+    type: Camera.Constants.Type.back,
+  };
 
   static navigationOptions = {
     title: "Medicamentos"
@@ -364,6 +434,9 @@ const Pantallas = StackNavigator(
     },
     Medicamentos: {
       screen: MedicamentosScreen
+    },
+    Camara:{
+      screen: CamaraScreen
     },
     Formato: {
       screen: TabNavigator({
