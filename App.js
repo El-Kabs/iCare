@@ -13,9 +13,10 @@ import {
   TouchableOpacity,
   Button,
   TextInput,
-  ScrollView
+  ScrollView,
+  Image,
 } from 'react-native';
-import { BarCodeScanner, Camera, Permissions } from 'expo';
+import { BarCodeScanner, Camera, Permissions, ImagePicker} from 'expo';
 import {
   StackNavigator,
   TabNavigator,
@@ -23,6 +24,9 @@ import {
 } from 'react-navigation';
 import t from 'tcomb-form-native';
 import * as firebase from 'firebase';
+import ReactTable from "react-table";
+
+
 
 var config = {
   apiKey: "AIzaSyBaDFN9ive_WcDv22fZi8ZS_XFxhVTigyI",
@@ -128,6 +132,8 @@ class LoginScreen extends Component {
 
         </Button>
         <Button title="Cámara" onPress={() => navigate('Home')}>
+        </Button>
+        <Button title="Formulario" onPress={()=> navigate('Formulario')}>
         </Button>
       </View>
     );
@@ -259,6 +265,8 @@ class NotasScreen extends Component {
     )
   }
 }
+class FormularioScreen extends Component{
+}
 
 class ExamenesScreen extends Component {
 
@@ -296,61 +304,64 @@ class CamaraScreen extends Component {
   }
 
   state = {
+    image: null,
     hasCameraPermission: null,
-    type: Camera.Constants.Type.back,
-    permissionsGranted: false,
   };
 
-  async componentWillMount() {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({ permissionsGranted: status === 'granted' });
+  componentDidMount() {
+    this._requestCameraPermission();
   }
+
+  _requestCameraPermission = async () => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    this.setState({
+      hasCameraPermission: status === 'granted',
+    });
+  };
 
   render() {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
-    const { permissionsGranted } = this.state;
-    console.log(this.state)
-    console.log(this.props)
-    if (permissionsGranted === null) {
-      return <View />;
-    } else if (permissionsGranted === false) {
-      return <Text>No access to camera</Text>;
-    } else {
-      return (
-        <View style={{ flex: 1 }}>
-          <Camera style={{ flex: 1 }} type={this.state.type}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'transparent',
-                flexDirection: 'row',
-              }}>
-              <TouchableOpacity
-                style={{
-                  flex: 0.1,
-                  alignSelf: 'flex-end',
-                  alignItems: 'center',
-                }}
-                onPress={() => {
-                  this.setState({
-                    type: this.state.type === Camera.Constants.Type.back
-                      ? Camera.Constants.Type.front
-                      : Camera.Constants.Type.back,
-                  });
-                }}>
-                <Text
-                  style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
-                  {' '}Flip{' '}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Camera>
+    let { image } = this.state;
+
+    return (
+      <View style={styles.container}>
+  
+          {this.state.hasCameraPermission === null
+            ? <Text>Requesting for camera permission</Text>
+            : this.state.hasCameraPermission === false
+              ? <Text style={{ color: '#fff' }}>
+                Camera permission is not granted
+                  </Text>
+              : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Button
+                title="Pick an image from camera roll"
+                onPress={this._pickImage}
+              />
+              {image &&
+                <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+            </View>}
+  
+          {}
+  
+          <StatusBar hidden />
         </View>
-      );
-    }
+    );
   }
+
+  _pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      this.setState({ image: result.uri });
+    }
+  };
 }
 
 class MedicamentosScreen extends Component {
@@ -443,6 +454,9 @@ const Pantallas = StackNavigator(
     },
     Camara:{
       screen: CamaraScreen
+    },
+    Formulario:{
+      screen: FormularioScreen
     },
     Formato: {
       screen: TabNavigator({
