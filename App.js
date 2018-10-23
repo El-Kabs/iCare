@@ -24,7 +24,7 @@ import {
 } from 'react-navigation';
 import t from 'tcomb-form-native';
 import * as firebase from 'firebase';
-import ReactTable from "react-table";
+
 
 
 
@@ -141,6 +141,19 @@ class LoginScreen extends Component {
 }
 
 class AgregarUsuarioScreen extends Component {
+  _handleSubmit = (user) => {  
+    console.log("entró")  
+    const value = this._form.getValue(); // use that ref to get the form value
+    console.log(value)
+    
+    
+
+
+   // firebase.database().ref("/json").push().set({
+    //  nombre: "Valeria"
+   // });
+
+  }
 
   render() {
     const { navigation } = this.props;
@@ -148,20 +161,14 @@ class AgregarUsuarioScreen extends Component {
     const datos = navigation.getParam('datos', '{"id": 0}');
     const Form = t.form.Form;
 
+    
+
     const User = t.struct({
       Nombre: t.String,
       Edad: t.Number,
       EPS: t.String,
       Cedula: t.String,
     });
-
-    _handleSubmit = result => {
-      console.log("Hola")
-      firebase.database().ref("/json").push().set({3:{
-        nombre: "Valeria"
-      }});
-
-    }
     return (
       <View style={styles.container}>
         <ToolbarAndroid style={{
@@ -169,16 +176,17 @@ class AgregarUsuarioScreen extends Component {
           backgroundColor: '#00701a',
           elevation: 4
         }} />
-        <ScrollView>
-          <Form type={User} />
+          <ScrollView>
+          <Form 
+          ref={c => this._form = c}
+          type={User}/>
           <Button
             title="Agregar Paciente"
-            onPress={() => this._handleSubmit}
+            onPress={() => this._handleSubmit(User)}
           />
         </ScrollView>
       </View>
     );
-
   }
 }
 class EditarUsuarioScreen extends Component {
