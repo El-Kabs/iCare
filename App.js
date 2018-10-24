@@ -149,9 +149,7 @@ class AgregarUsuarioScreen extends Component {
     
 
 
-   // firebase.database().ref("/json").push().set({
-    //  nombre: "Valeria"
-   // });
+    firebase.database().ref("/json").push(value);
 
   }
 
