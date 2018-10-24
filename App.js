@@ -24,9 +24,7 @@ import {
 } from 'react-navigation';
 import t from 'tcomb-form-native';
 import * as firebase from 'firebase';
-
-
-
+import * as uuid from 'react-native-uuid';
 
 var config = {
   apiKey: "AIzaSyBaDFN9ive_WcDv22fZi8ZS_XFxhVTigyI",
@@ -42,6 +40,8 @@ if (!firebase.apps.length) {
 }
 
 var database = firebase.database();
+
+var storageRef = firebase.storage().ref();
 
 class HomeScreen extends Component {
 
@@ -72,13 +72,15 @@ class HomeScreen extends Component {
         var snap = snapshot.val();
         var found = {}
         var encontrado = false;
-        for (var i = 0; i < snap.length; i++) {
-          if (snap[i].id === lectura.id) {
-            found = snap[i];
+        Object.keys(snap).forEach(function(key){
+          if(snap[key].id === lectura.id){
+            found = snap[key];
+            found["llave"] = key;
             encontrado = true;
           }
-        }
+        })
         if (encontrado) {
+          console.log(found)
           navigate('Usuario', { datos: found });
         }
       });
@@ -142,15 +144,22 @@ class LoginScreen extends Component {
 
 class AgregarUsuarioScreen extends Component {
   _handleSubmit = (user) => {  
-    console.log("entró")  
-    const value = this._form.getValue(); // use that ref to get the form value
-    console.log(value)
-    
-    
-
-
-    firebase.database().ref("/json").push(value);
-
+    var value = this._form.getValue();
+    var idN = 0;
+    firebase
+      .database()
+      .ref('/json')
+      .once('value')
+      .then(function (snapshot) {
+        var snap = snapshot.val();
+        idN = Object.keys(snap).length;
+        var xd = JSON.parse(JSON.stringify(value));
+        xd.id = ""+idN;
+        firebase.database().ref("/json").push(xd).then(function(){
+          Alert.alert("Usuario agregado exitosamente.")
+          }
+        );
+      });
   }
 
   render() {
@@ -159,13 +168,11 @@ class AgregarUsuarioScreen extends Component {
     const datos = navigation.getParam('datos', '{"id": 0}');
     const Form = t.form.Form;
 
-    
-
     const User = t.struct({
       Nombre: t.String,
       Edad: t.Number,
       EPS: t.String,
-      Cedula: t.String,
+      Cedula: t.Number,
     });
     return (
       <View style={styles.container}>
@@ -194,18 +201,19 @@ class EditarUsuarioScreen extends Component {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
+    console.log(datos);
     const Form = t.form.Form;
     var Vinicial = {
       Nombre: datos.Nombre,
-      Edad: datos.edad,
-      Cedula: datos.cedula,
-      EPS: datos.eps,
+      Edad: datos.Edad,
+      Cedula: datos.Cedula,
+      EPS: datos.EPS,
     };
     const User = t.struct({
       Nombre: t.String,
       Edad: t.Number,
       EPS: t.String,
-      Cedula: t.String,
+      Cedula: t.Number,
       Especialidad: t.String,
       Medicamentos: t.String,
       Examenes: t.String,
@@ -215,7 +223,6 @@ class EditarUsuarioScreen extends Component {
     _handleSubmit = result => {
 
     }
-    console.log(datos);
     return (
       <View style={styles.container}>
         <ToolbarAndroid style={{
@@ -224,13 +231,13 @@ class EditarUsuarioScreen extends Component {
           elevation: 4
         }} />
         <Text>Nombre: {JSON.stringify(datos.Nombre)}</Text>
-        <Text>Edad: {JSON.stringify(datos.edad)}</Text>
-        <Text>EPS: {JSON.stringify(datos.eps)}</Text>
-        <Text>Cedula: {JSON.stringify(datos.cedula)}</Text>
+        <Text>Edad: {JSON.stringify(datos.Edad)}</Text>
+        <Text>EPS: {JSON.stringify(datos.EPS)}</Text>
+        <Text>Cedula: {JSON.stringify(datos.Cedula)}</Text>
         
         <FlatList
           data={datos.especialidades}
-          renderItem={({item}) => <TouchableOpacity onPress={() => navigate('Formato', { datos: datos })}><Text>{item.nombre}</Text></TouchableOpacity>}
+          renderItem={({item}) => <TouchableOpacity onPress={() => navigate('Formato', { datos: datos, especiali: item.nombre })}><Text>{item.nombre}</Text></TouchableOpacity>}
           keyExtractor={({id}, index) => id}
         />
         <TouchableOpacity onPress={() => navigate('Medicamentos', { datos: datos })}>
@@ -248,25 +255,52 @@ class EditarUsuarioScreen extends Component {
 }
 
 class NotasScreen extends Component {
+
+  _handleSubmit = () => {
+    console.log(this.state.text);
+    const datos = this.props.navigation.getParam('datos', '{"id": 0}');
+    const especialidad = this.props.navigation.getParam('especiali', '{"id": 0}')
+    var cual = 0
+    for(var i = 0; i<datos.especialidades.length; i++){
+      if(datos.especialidades[i].nombre === especialidad){
+        cual = i;
+      }
+    } 
+    var ruta = "/json/"+datos.llave+"/especialidades/"+cual+"/"
+    console.log(ruta)
+    firebase.database().ref(ruta).set({nombre: especialidad, notas: this.state.text})
+  }
+
   static navigationOptions = {
     title: "Notas"
   }
 
   constructor(props) {
     super(props);
-    this.state = { text: 'Useless Placeholder' };
+    const datos = this.props.navigation.getParam('datos', '{"id": 0}');
+    const especialidad = this.props.navigation.getParam('especiali', '{"id": 0}')
+    var nota = "";
+    for(var i = 0; i<datos.especialidades.length; i++){
+      if(datos.especialidades[i].nombre === especialidad){
+        console.log(datos.especialidades[i].notas)
+        nota = datos.especialidades[i].notas;
+      }
+    }
+    this.state = { text: nota };
   }
 
   render() {
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
-    const datos = navigation.getParam('datos', '{"id": 0}');
-
-
     return (
       <View>
         <TextInput style={{ borderColor: 'gray', borderWidth: 1 }} editable={true} onChangeText={(text) => this.setState({ text })}
-          value={datos.notas} />
+          value={this.state.text} />
+        <TouchableOpacity onPress={() => this._handleSubmit()}>
+          <Text>
+            Guardar
+          </Text>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -275,7 +309,7 @@ class FormularioScreen extends Component{
 }
 
 class ExamenesScreen extends Component {
-
+ 
   static navigationOptions = {
     title: "Examenes"
   }
@@ -352,10 +386,36 @@ class CamaraScreen extends Component {
           {}
   
           <StatusBar hidden />
+          
+        <TouchableOpacity onPress={() => this.guardar()} >
+          <Text>
+            Guardar
+          </Text>
+        </TouchableOpacity>
+
         </View>
     );
   }
 
+  guardar = () => {
+    let uri = this.state.image
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', uri, true);
+    xhr.responseType = 'blob';
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        var myBlob = this.response;
+        firebase.storage().ref(uuid.v1()).put(myBlob).then(function(snapshot) {
+          console.log('Uploaded a blob or file!');
+          console.log(snapshot)
+        });
+      }
+    };
+    xhr.send();
+  
+    
+  }
+  
   _pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -375,6 +435,10 @@ class MedicamentosScreen extends Component {
   state = {
     hasCameraPermission: null,
     type: Camera.Constants.Type.back,
+    textInput : [],
+    agregado: [],
+    nombre: '',
+    dosis: ''
   };
 
   static navigationOptions = {
@@ -383,6 +447,46 @@ class MedicamentosScreen extends Component {
 
   constructor(props) {
     super(props);
+  }
+
+  addTextInput = (key) => {
+    let textInput = this.state.textInput;
+    if(textInput.length === 0){
+      textInput.push(
+        <View>
+          <Text>Nombre: </Text>
+          <TextInput key={key} onChangeText={(nombre) => this.setState({ nombre })}/>
+          <Text>Dosis: </Text>
+          <TextInput key={key} onChangeText={(dosis) => this.setState({ dosis })}/>
+        </View>
+        );
+        this.setState({ textInput })
+    }
+  }
+
+  guardar = () => {
+    let _this = this;
+    let agregado = this.state.agregado;
+    let nombrebb = this.state.nombre;
+    let dosisbb = this.state.dosis;
+    const datos = this.props.navigation.getParam('datos', '{"id": 0}');
+    var ruta = "/json/"+datos.llave+"/medicamentos/"
+    console.log(ruta)
+    firebase.database().ref(ruta).push({nombre: this.state.nombre, dosis: this.state.dosis}).then(function(){
+      agregado.push(
+        <View>
+          <Text>
+            {nombrebb}
+          </Text>
+          <Text>
+            {dosisbb}
+          </Text>
+        </View>
+      )
+      _this.setState({ agregado })
+      let textInput = []
+      _this.setState({ textInput })
+    })
   }
 
   render() {
@@ -395,9 +499,25 @@ class MedicamentosScreen extends Component {
       <View>
         <FlatList
           data={datos.medicamentos}
-          renderItem={({item}) => <Text>{item.nombre}, {item.dosis},  {item.informacion}</Text>}
+          renderItem={({item}) => <Text>{item.nombre}, {item.dosis}</Text>}
           keyExtractor={({id}, index) => id}
         />
+        {this.state.textInput.map((value, index) => {
+          return value
+        })}
+        {this.state.agregado.map((value, index) => {
+          return value
+        })}
+        <TouchableOpacity onPress={() => this.addTextInput(this.state.textInput.length)} >
+          <Text>
+            Agregar medicamento
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.guardar()} >
+          <Text>
+            Guardar
+          </Text>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -429,9 +549,9 @@ class UsuarioScreen extends Component {
         }} />
         <Text>Paciente</Text>
         <Text>Nombre: {JSON.stringify(datos.Nombre)}</Text>
-        <Text>Edad: {JSON.stringify(datos.edad)}</Text>
-        <Text>EPS: {JSON.stringify(datos.eps)}</Text>
-        <Text>Cedula: {JSON.stringify(datos.cedula)}</Text>
+        <Text>Edad: {JSON.stringify(datos.Edad)}</Text>
+        <Text>EPS: {JSON.stringify(datos.EPS)}</Text>
+        <Text>Cedula: {JSON.stringify(datos.Cedula)}</Text>
         <Button title="Editar Paciente" onPress={() => navigate('EditarUsuario', { datos: datos })}></Button>
       </View>
     );
@@ -471,7 +591,7 @@ const Pantallas = StackNavigator(
           activeTintColor: '#e91e63'
         },
         Examenes: {
-          screen: ExamenesScreen,
+          screen: CamaraScreen,
           activeTintColor: '#e91e63'
         }
       }, {

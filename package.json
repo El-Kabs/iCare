@@ -25,6 +25,7 @@
     "react-native": "~0.55.2",
     "react-native-data-table": "^0.2.0",
     "react-native-tableview-form": "0.0.3",
+    "react-native-uuid": "^1.4.9",
     "react-navigation": "^2.14.2",
     "react-table": "^6.8.6",
     "tcomb-form-native": "^0.6.20"
