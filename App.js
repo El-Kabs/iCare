@@ -16,7 +16,7 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { BarCodeScanner, Camera, Permissions, ImagePicker} from 'expo';
+import { BarCodeScanner, Camera, Permissions, ImagePicker } from 'expo';
 import {
   StackNavigator,
   TabNavigator,
@@ -24,7 +24,7 @@ import {
 } from 'react-navigation';
 import t from 'tcomb-form-native';
 import * as firebase from 'firebase';
-import * as uuid from 'react-native-uuid';
+import uuid from 'react-native-uuid';
 
 var config = {
   apiKey: "AIzaSyBaDFN9ive_WcDv22fZi8ZS_XFxhVTigyI",
@@ -72,8 +72,8 @@ class HomeScreen extends Component {
         var snap = snapshot.val();
         var found = {}
         var encontrado = false;
-        Object.keys(snap).forEach(function(key){
-          if(snap[key].id === lectura.id){
+        Object.keys(snap).forEach(function (key) {
+          if (snap[key].id === lectura.id) {
             found = snap[key];
             found["llave"] = key;
             encontrado = true;
@@ -91,10 +91,10 @@ class HomeScreen extends Component {
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
     if (this.props.navigation.state.routeName !== 'Home') return null
-    else{
+    else {
       return (
         <View style={styles.container}>
-  
+
           {this.state.hasCameraPermission === null
             ? <Text>Requesting for camera permission</Text>
             : this.state.hasCameraPermission === false
@@ -108,9 +108,9 @@ class HomeScreen extends Component {
                   width: Dimensions.get('window').width,
                 }}
               />}
-  
+
           {}
-  
+
           <StatusBar hidden />
         </View>
       );
@@ -135,7 +135,7 @@ class LoginScreen extends Component {
         </Button>
         <Button title="Cámara" onPress={() => navigate('Home')}>
         </Button>
-        <Button title="Formulario" onPress={()=> navigate('Formulario')}>
+        <Button title="Formulario" onPress={() => navigate('Formulario')}>
         </Button>
       </View>
     );
@@ -143,7 +143,7 @@ class LoginScreen extends Component {
 }
 
 class AgregarUsuarioScreen extends Component {
-  _handleSubmit = (user) => {  
+  _handleSubmit = (user) => {
     var value = this._form.getValue();
     var idN = 0;
     firebase
@@ -154,10 +154,10 @@ class AgregarUsuarioScreen extends Component {
         var snap = snapshot.val();
         idN = Object.keys(snap).length;
         var xd = JSON.parse(JSON.stringify(value));
-        xd.id = ""+idN;
-        firebase.database().ref("/json").push(xd).then(function(){
+        xd.id = "" + idN;
+        firebase.database().ref("/json").push(xd).then(function () {
           Alert.alert("Usuario agregado exitosamente.")
-          }
+        }
         );
       });
   }
@@ -181,10 +181,10 @@ class AgregarUsuarioScreen extends Component {
           backgroundColor: '#00701a',
           elevation: 4
         }} />
-          <ScrollView>
-          <Form 
-          ref={c => this._form = c}
-          type={User}/>
+        <ScrollView>
+          <Form
+            ref={c => this._form = c}
+            type={User} />
           <Button
             title="Agregar Paciente"
             onPress={() => this._handleSubmit(User)}
@@ -197,7 +197,7 @@ class AgregarUsuarioScreen extends Component {
 class EditarUsuarioScreen extends Component {
 
   render() {
-    
+
     const { navigation } = this.props;
     const { navigate } = this.props.navigation;
     const datos = navigation.getParam('datos', '{"id": 0}');
@@ -234,11 +234,11 @@ class EditarUsuarioScreen extends Component {
         <Text>Edad: {JSON.stringify(datos.Edad)}</Text>
         <Text>EPS: {JSON.stringify(datos.EPS)}</Text>
         <Text>Cedula: {JSON.stringify(datos.Cedula)}</Text>
-        
+
         <FlatList
           data={datos.especialidades}
-          renderItem={({item}) => <TouchableOpacity onPress={() => navigate('Formato', { datos: datos, especiali: item.nombre })}><Text>{item.nombre}</Text></TouchableOpacity>}
-          keyExtractor={({id}, index) => id}
+          renderItem={({ item }) => <TouchableOpacity onPress={() => navigate('Formato', { datos: datos, especiali: item.nombre })}><Text>{item.nombre}</Text></TouchableOpacity>}
+          keyExtractor={({ id }, index) => id}
         />
         <TouchableOpacity onPress={() => navigate('Medicamentos', { datos: datos })}>
           <Text> Medicamentos </Text>
@@ -261,14 +261,14 @@ class NotasScreen extends Component {
     const datos = this.props.navigation.getParam('datos', '{"id": 0}');
     const especialidad = this.props.navigation.getParam('especiali', '{"id": 0}')
     var cual = 0
-    for(var i = 0; i<datos.especialidades.length; i++){
-      if(datos.especialidades[i].nombre === especialidad){
+    for (var i = 0; i < datos.especialidades.length; i++) {
+      if (datos.especialidades[i].nombre === especialidad) {
         cual = i;
       }
-    } 
-    var ruta = "/json/"+datos.llave+"/especialidades/"+cual+"/"
+    }
+    var ruta = "/json/" + datos.llave + "/especialidades/" + cual + "/"
     console.log(ruta)
-    firebase.database().ref(ruta).set({nombre: especialidad, notas: this.state.text})
+    firebase.database().ref(ruta).set({ nombre: especialidad, notas: this.state.text })
   }
 
   static navigationOptions = {
@@ -280,8 +280,8 @@ class NotasScreen extends Component {
     const datos = this.props.navigation.getParam('datos', '{"id": 0}');
     const especialidad = this.props.navigation.getParam('especiali', '{"id": 0}')
     var nota = "";
-    for(var i = 0; i<datos.especialidades.length; i++){
-      if(datos.especialidades[i].nombre === especialidad){
+    for (var i = 0; i < datos.especialidades.length; i++) {
+      if (datos.especialidades[i].nombre === especialidad) {
         console.log(datos.especialidades[i].notas)
         nota = datos.especialidades[i].notas;
       }
@@ -305,11 +305,11 @@ class NotasScreen extends Component {
     )
   }
 }
-class FormularioScreen extends Component{
+class FormularioScreen extends Component {
 }
 
 class ExamenesScreen extends Component {
- 
+
   static navigationOptions = {
     title: "Examenes"
   }
@@ -327,7 +327,7 @@ class ExamenesScreen extends Component {
 
     return (
       <View>
-        <Button title="Camara" onPress={() => navigate('Camara', { datos: datos })}/>
+        <Button title="Camara" onPress={() => navigate('Camara', { datos: datos })} />
       </View>
     )
   }
@@ -335,6 +335,7 @@ class ExamenesScreen extends Component {
 }
 
 class CamaraScreen extends Component {
+  
   static navigationOptions = {
     title: "Camara"
   }
@@ -344,6 +345,7 @@ class CamaraScreen extends Component {
   }
 
   state = {
+    uuid: null,
     image: null,
     hasCameraPermission: null,
   };
@@ -367,14 +369,14 @@ class CamaraScreen extends Component {
 
     return (
       <View style={styles.container}>
-  
-          {this.state.hasCameraPermission === null
-            ? <Text>Requesting for camera permission</Text>
-            : this.state.hasCameraPermission === false
-              ? <Text style={{ color: '#fff' }}>
-                Camera permission is not granted
+
+        {this.state.hasCameraPermission === null
+          ? <Text>Requesting for camera permission</Text>
+          : this.state.hasCameraPermission === false
+            ? <Text style={{ color: '#fff' }}>
+              Camera permission is not granted
                   </Text>
-              : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Button
                 title="Pick an image from camera roll"
                 onPress={this._pickImage}
@@ -382,40 +384,62 @@ class CamaraScreen extends Component {
               {image &&
                 <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
             </View>}
-  
-          {}
-  
-          <StatusBar hidden />
-          
+
+        {}
+
+        <StatusBar hidden />
+
         <TouchableOpacity onPress={() => this.guardar()} >
           <Text>
             Guardar
           </Text>
         </TouchableOpacity>
 
-        </View>
+      </View>
     );
   }
 
   guardar = () => {
+    let especialidad = this.props.navigation.getParam('especiali', '{"id": 0}')
+    let datos = this.props.navigation.getParam('datos', '{"id": 0}');
     let uri = this.state.image
     var xhr = new XMLHttpRequest();
     xhr.open('GET', uri, true);
     xhr.responseType = 'blob';
-    xhr.onload = function(e) {
+    xhr.onload = function (e) {
+      console.log("DAtos onload: "+datos)
       if (this.status == 200) {
+        console.log("DAtos if: "+datos)
         var myBlob = this.response;
-        firebase.storage().ref(uuid.v1()).put(myBlob).then(function(snapshot) {
-          console.log('Uploaded a blob or file!');
-          console.log(snapshot)
+        var uuidd = uuid.v1()
+        firebase.storage().ref(uuidd).put(myBlob).then(function (snapshot) {
+          console.log("DAtos subido: "+datos)
+          var down = ""
+          snapshot.ref.getDownloadURL().then(function (downloadURL) {
+            console.log("DAtos download: "+datos)            
+            down = downloadURL
+            var ruta = "/json/" + datos.llave + "/especialidades/" + cual + "/"
+            var cual = 0
+            console.log(datos)
+            for (var i = 0; i < datos.especialidades.length; i++) {
+              if (datos.especialidades[i].nombre === especialidad) {
+                cual = i;
+              }
+            }
+            var ruta = "/json/" + datos.llave + "/especialidades/" + cual + "/examenes"
+            firebase.database().ref(ruta).push({ url: down }).then(function(){
+              Alert.alert("Imagen subida correctamente.")
+            })
+          });
         });
-      }
+      };
+
     };
     xhr.send();
-  
-    
+
+
   }
-  
+
   _pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -435,7 +459,7 @@ class MedicamentosScreen extends Component {
   state = {
     hasCameraPermission: null,
     type: Camera.Constants.Type.back,
-    textInput : [],
+    textInput: [],
     agregado: [],
     nombre: '',
     dosis: ''
@@ -451,16 +475,16 @@ class MedicamentosScreen extends Component {
 
   addTextInput = (key) => {
     let textInput = this.state.textInput;
-    if(textInput.length === 0){
+    if (textInput.length === 0) {
       textInput.push(
         <View>
           <Text>Nombre: </Text>
-          <TextInput key={key} onChangeText={(nombre) => this.setState({ nombre })}/>
+          <TextInput key={key} onChangeText={(nombre) => this.setState({ nombre })} />
           <Text>Dosis: </Text>
-          <TextInput key={key} onChangeText={(dosis) => this.setState({ dosis })}/>
+          <TextInput key={key} onChangeText={(dosis) => this.setState({ dosis })} />
         </View>
-        );
-        this.setState({ textInput })
+      );
+      this.setState({ textInput })
     }
   }
 
@@ -470,9 +494,9 @@ class MedicamentosScreen extends Component {
     let nombrebb = this.state.nombre;
     let dosisbb = this.state.dosis;
     const datos = this.props.navigation.getParam('datos', '{"id": 0}');
-    var ruta = "/json/"+datos.llave+"/medicamentos/"
+    var ruta = "/json/" + datos.llave + "/medicamentos/"
     console.log(ruta)
-    firebase.database().ref(ruta).push({nombre: this.state.nombre, dosis: this.state.dosis}).then(function(){
+    firebase.database().ref(ruta).push({ nombre: this.state.nombre, dosis: this.state.dosis }).then(function () {
       agregado.push(
         <View>
           <Text>
@@ -499,8 +523,8 @@ class MedicamentosScreen extends Component {
       <View>
         <FlatList
           data={datos.medicamentos}
-          renderItem={({item}) => <Text>{item.nombre}, {item.dosis}</Text>}
-          keyExtractor={({id}, index) => id}
+          renderItem={({ item }) => <Text>{item.nombre}, {item.dosis}</Text>}
+          keyExtractor={({ id }, index) => id}
         />
         {this.state.textInput.map((value, index) => {
           return value
@@ -578,10 +602,10 @@ const Pantallas = StackNavigator(
     Medicamentos: {
       screen: MedicamentosScreen
     },
-    Camara:{
+    Camara: {
       screen: CamaraScreen
     },
-    Formulario:{
+    Formulario: {
       screen: FormularioScreen
     },
     Formato: {
